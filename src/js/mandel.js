@@ -17,6 +17,10 @@ class Rectangle {
         this.height = height;
     }
 
+    translate(shiftLeft, shiftTop) {
+        return new Rectangle(this.left + shiftLeft, this.top + shiftTop, this.width, this.height);
+    }
+
     projectPoint(point, fromRect) {
         return new Point(((point.x - fromRect.left) / fromRect.width) * this.width + this.left, ((point.y - fromRect.top) / fromRect.height) * this.height + this.top);
     }
@@ -31,11 +35,10 @@ class Rectangle {
 }
 
 function getSteps(start, distance, numPoints) {
+
     const increment = distance / (numPoints - 1);
-    const stepper = (acc, val) => [acc + increment, val + acc];
-    const discardAccumulator = x => x[1];
-    const stepBuilder = R.pipe(R.repeat(start), R.mapAccum(stepper, 0), discardAccumulator);
-    return stepBuilder(numPoints);
+    const stepper = n => (n.step === numPoints) ? false : [n.val, { val: n.val + increment, step: n.step + 1 }];
+    return R.unfold(stepper, { val: start, step: 0 });
 }
 
 function getMandelGridPoints(canvasRect, mandelRect) {
@@ -47,7 +50,7 @@ function getMandelGridPoints(canvasRect, mandelRect) {
 
 const getMandelShade = R.curry((maxIterations, b, a) => {
     var currDistSq, aSq = 0.0, bSq = 0.0;
-    var originalA = a, originalB = b;
+    const originalA = a, originalB = b;
     var numIterations = 0;
 
     while (numIterations++ < maxIterations) {
@@ -64,18 +67,18 @@ const getMandelShade = R.curry((maxIterations, b, a) => {
 
 const mandelShadeToColour = R.curry((maxIterations, numIterations) => {
     if (numIterations === 0) {
-        return { r: 255, g: 255, b: 255, a: 255 };
+        return { r: 255, g: 255, b: 255, a: 255 }; // At this point the function immediately escapes to infinity = white.
     } else if (numIterations >= maxIterations) {
-        return { r: 0, g: 0, b: 0, a: 255 };
+        return { r: 0, g: 0, b: 0, a: 255 }; // The function (probably) never escapes to infinity = black.
     } else {
         var pixelShade = Math.round((maxIterations - numIterations) / maxIterations * 255);
-        return { r: pixelShade, g: pixelShade, b: pixelShade, a: 255 };
+        return { r: pixelShade, g: pixelShade, b: pixelShade, a: 255 }; // The longer it takes to escpae, the darker the pixel.
     }
 });
 
 const getMandelRowWithIndex = R.curry((maxIterations, mandelXs, canvasY, mandelY) => {
     const rowColours = mandelXs.map(R.pipe(getMandelShade(maxIterations, mandelY), mandelShadeToColour(maxIterations)));
-    return [canvasY, rowColours];
+    return R.pair(canvasY, rowColours);
 });
 
 var mandelRect;
@@ -136,7 +139,7 @@ function drawDots(mandelRect) {
     var ctx = c.getContext("2d");
     var canvasData = ctx.getImageData(0, 0, width, height);
 
-    var canvasRect = new Rectangle(0, 0, width, height);
+    const canvasRect = new Rectangle(0, 0, width, height);
 
     const maxIterations = 500;
 
@@ -184,9 +187,26 @@ function initDraw(canvas) {
         }
     };
 
+    const normaliseCanvasRegionRect = (regionRect) => {
+        const canvas = getCanvas();
+        return regionRect.translate(-canvas.offsetLeft, -canvas.offsetTop);
+    };
+
+    const fixCanvasRegionAspectRatio = (regionRect) => {
+        const canvas = getCanvas();
+        const canvasAspectRatio = canvas.width / canvas.height;
+        if (regionRect.width < regionRect.height) {
+            return new Rectangle(regionRect.left, regionRect.top, regionRect.width, Math.round(regionRect.width / canvasAspectRatio));
+        } else {
+            return new Rectangle(regionRect.left, regionRect.top, Math.round(regionRect.height * canvasAspectRatio), regionRect.height);
+        }
+    };
+
     canvas.onclick = function (e) {
         if (element !== null) {
-            zoom(new Rectangle(parseInt(element.style.left), parseInt(element.style.top), parseInt(element.style.width), parseInt(element.style.height)));
+            const rawSelectionRect = new Rectangle(parseInt(element.style.left), parseInt(element.style.top), parseInt(element.style.width), parseInt(element.style.height));
+            const canvasRelativeSelectionRect = R.pipe(normaliseCanvasRegionRect, fixCanvasRegionAspectRatio)(rawSelectionRect);
+            zoom(canvasRelativeSelectionRect);
             drawDots(mandelRect);
             element = null;
             canvas.style.cursor = "default";
