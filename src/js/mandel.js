@@ -211,7 +211,6 @@ function initDraw(canvas) {
             element = null;
             canvas.style.cursor = "default";
         } else {
-            //console.log("begun.");
             mouse.startX = mouse.x;
             mouse.startY = mouse.y;
             element = document.createElement("div");
