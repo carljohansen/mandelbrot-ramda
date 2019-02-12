@@ -1,4 +1,8 @@
+/* eslint-disable no-debugger */
+/* eslint-disable no-undef */
 const R = require("ramda");
+
+import Worker from "./calcmandel.worker.js";
 
 const mapIndexed = R.addIndex(R.map);
 
@@ -21,16 +25,13 @@ class Rectangle {
         return new Rectangle(this.left + shiftLeft, this.top + shiftTop, this.width, this.height);
     }
 
-    projectPoint(point, fromRect) {
-        return new Point(((point.x - fromRect.left) / fromRect.width) * this.width + this.left, ((point.y - fromRect.top) / fromRect.height) * this.height + this.top);
+    projectPointInvertedVertical(point, fromRect) {
+        const projectedDistance = this.projectVectorInvertedVertical(point, fromRect);
+        return new Point(projectedDistance.x + this.left, this.top - projectedDistance.y);
     }
 
-    projectX(fromRect, x) {
-        return ((x - fromRect.left) / fromRect.width) * this.width + this.left;
-    }
-
-    projectY(fromRect, y) {
-        return ((y - fromRect.top) / fromRect.height) * this.height + this.top;
+    projectVectorInvertedVertical(vector, fromRect) {
+        return new Point(((vector.x - fromRect.left) / fromRect.width) * this.width, ((vector.y - fromRect.top) / fromRect.height) * this.height);
     }
 }
 
@@ -44,42 +45,9 @@ function getSteps(start, distance, numPoints) {
 function getMandelGridPoints(canvasRect, mandelRect) {
     return {
         mandelGridXpoints: getSteps(mandelRect.left, mandelRect.width, canvasRect.width),
-        mandelGridYpoints: getSteps(mandelRect.top, mandelRect.height, canvasRect.height)
+        mandelGridYpoints: getSteps(mandelRect.top, -mandelRect.height, canvasRect.height)
     };
 }
-
-const getMandelShade = R.curry((maxIterations, b, a) => {
-    var currDistSq, aSq = 0.0, bSq = 0.0;
-    const originalA = a, originalB = b;
-    var numIterations = 0;
-
-    while (numIterations++ < maxIterations) {
-        aSq = a * a;
-        bSq = b * b;
-        currDistSq = aSq + bSq;
-        if (currDistSq > 4)
-            return numIterations;
-        b = 2 * a * b + originalB;
-        a = (aSq - bSq) + originalA;
-    }
-    return maxIterations;
-});
-
-const mandelShadeToColour = R.curry((maxIterations, numIterations) => {
-    if (numIterations === 0) {
-        return { r: 255, g: 255, b: 255, a: 255 }; // At this point the function immediately escapes to infinity = white.
-    } else if (numIterations >= maxIterations) {
-        return { r: 0, g: 0, b: 0, a: 255 }; // The function (probably) never escapes to infinity = black.
-    } else {
-        var pixelShade = Math.round((maxIterations - numIterations) / maxIterations * 255);
-        return { r: pixelShade, g: pixelShade, b: pixelShade, a: 255 }; // The longer it takes to escpae, the darker the pixel.
-    }
-});
-
-const getMandelRowWithIndex = R.curry((maxIterations, mandelXs, canvasY, mandelY) => {
-    const rowColours = mandelXs.map(R.pipe(getMandelShade(maxIterations, mandelY), mandelShadeToColour(maxIterations)));
-    return R.pair(canvasY, rowColours);
-});
 
 var mandelRect;
 
@@ -110,21 +78,26 @@ const drawRow = R.curry((canvasData, canvasY, colours) => {
     setCanvasRowPixels(colours);
 });
 
-function zoom(canvasSelectionRect) {
-    var c = getCanvas();
+function projectMandelSelectionRect(canvasSelectionRect) {
+    const c = getCanvas();
     var width, height;
     ({ width, height } = getCanvasDimensions(c));
-    var canvasRect = new Rectangle(0, 0, width, height);
-    var topLeft = mandelRect.projectPoint(new Point(canvasSelectionRect.left, canvasSelectionRect.top), canvasRect);
-    var bottomRight = mandelRect.projectPoint(new Point(canvasSelectionRect.left + canvasSelectionRect.width, canvasSelectionRect.top + canvasSelectionRect.height), canvasRect);
-    mandelRect.left = topLeft.x;
-    mandelRect.top = topLeft.y;
-    mandelRect.width = bottomRight.x - topLeft.x;
-    mandelRect.height = bottomRight.y - topLeft.y;
+
+    const canvasRect = new Rectangle(0, 0, width, height);
+    const topLeft = mandelRect.projectPointInvertedVertical(new Point(canvasSelectionRect.left, canvasSelectionRect.top), canvasRect);
+    const widthHeight = mandelRect.projectVectorInvertedVertical(new Point(canvasSelectionRect.width, canvasSelectionRect.height), canvasRect);
+
+    return new Rectangle(topLeft.x, topLeft.y, widthHeight.x, widthHeight.y);
+}
+
+function zoom(canvasSelectionRect) {
+
+    const newMandelRect = projectMandelSelectionRect(canvasSelectionRect);
+    mandelRect = newMandelRect;
 }
 
 function resetMandelRect() {
-    mandelRect = new Rectangle(-2, -2, 4, 4);
+    mandelRect = new Rectangle(-2, 1.5, 3, 3);
 }
 
 function updateCanvas(canvasContext, canvasData) {
@@ -141,17 +114,45 @@ function drawDots(mandelRect) {
 
     const canvasRect = new Rectangle(0, 0, width, height);
 
-    const maxIterations = 500;
+    const maxIterations = 5000;
+    const maxThreads = 4;
 
     const gridPoints = getMandelGridPoints(canvasRect, mandelRect);
 
-    const getMandelRow = mapIndexed((mandelGridY, canvasY) => getMandelRowWithIndex(maxIterations, gridPoints.mandelGridXpoints, canvasY, mandelGridY));
-    const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1]);
+    var jobs = getJobs(gridPoints, maxThreads);
 
-    // TODO: I don't like the way gridYpoints is passed in at the start of the pipe but gridXpoints is closured half way through the pipe.
-    R.pipe(getMandelRow, R.forEach(drawRowToCanvasData))(gridPoints.mandelGridYpoints);
-    updateCanvas(ctx, canvasData);
+    const rowIndexer = (acc, val) => [acc + val.length, { startRow: acc, array: val }];
+    const jobsWithStartRowIndexes = R.mapAccum(rowIndexer, 0, jobs)[1];
+
+    const workerParams = jobsWithStartRowIndexes.map(job => {
+        return {
+            startRow: job.startRow,
+            array: job.array,
+            gridPoints: gridPoints,
+            maxIterations: maxIterations
+        };
+    });
+    
+    R.forEach(p => {
+        let w = new Worker();
+        w.postMessage(p);
+        w.onmessage = (event) => {
+
+            const startRow = event.data[0];
+            const mandelRows = event.data[1];
+            const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRow + canvasY, row));
+            const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
+            R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelRows);
+            updateCanvas(ctx, canvasData);
+        };
+    })(workerParams);
 }
+
+const getJobs = (gridPoints, numWorkers) => {
+
+    const rowsPerWorker = Math.round(gridPoints.mandelGridYpoints.length / numWorkers) + 1;
+    return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints);
+};
 
 //---------------------------------------------------------
 
@@ -161,8 +162,8 @@ function initDraw(canvas) {
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
         if (ev.pageX) { //Moz
-            mouse.x = ev.pageX + window.pageXOffset;
-            mouse.y = ev.pageY + window.pageYOffset;
+            mouse.x = ev.offsetX; //ev.pageX + window.pageXOffset;
+            mouse.y = ev.offsetY; // ev.pageY + window.pageYOffset;
         } else if (ev.clientX) { //IE
             mouse.x = ev.clientX + document.body.scrollLeft;
             mouse.y = ev.clientY + document.body.scrollTop;
@@ -175,6 +176,7 @@ function initDraw(canvas) {
         startX: 0,
         startY: 0
     };
+
     var element = null;
 
     canvas.onmousemove = function (e) {
@@ -189,7 +191,7 @@ function initDraw(canvas) {
 
     const normaliseCanvasRegionRect = (regionRect) => {
         const canvas = getCanvas();
-        return regionRect.translate(-canvas.offsetLeft, -canvas.offsetTop);
+        return regionRect; //regionRect.translate(-canvas.offsetLeft, -canvas.offsetTop);
     };
 
     const fixCanvasRegionAspectRatio = (regionRect) => {
@@ -223,6 +225,10 @@ function initDraw(canvas) {
     };
 }
 //---------------------------------------------------------
+
+window.goDrawDots = function goDrawDots() {
+    drawDots(mandelRect);
+};
 
 resetMandelRect();
 drawDots(mandelRect);

@@ -54,6 +54,10 @@ module.exports = {
                 ]
             },
             {
+                test: /\.worker\.js$/,
+                use: [{ loader: "worker-loader" }],
+            },
+            {
                 test: /\.css$/,
                 use: [
                     MiniCssExtractPlugin.loader,
@@ -122,7 +126,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: "index.html",
             template: "src/index.html",
-            chunks: [ "vendor", "index"]
+            chunks: ["vendor", "index"]
         }),
         new webpack.ProvidePlugin({
             $: "jquery",
@@ -144,7 +148,7 @@ module.exports = {
                             match: [
                                 "**/*.php"
                             ],
-                            fn: function(event, file) {
+                            fn: function (event, file) {
                                 if (event === "change") {
                                     const bs = require("browser-sync").get("bs-webpack-plugin");
                                     bs.reload();
@@ -157,20 +161,20 @@ module.exports = {
                     reload: false
                 })
         ] : [
-            new PurifyCSSPlugin({
-                paths: glob.sync([
-                    path.join(__dirname, "src/*.html"),
-                    path.join(__dirname, "src/js/*.js")
-                ]),
-                minimize: true
-            }),
-            new CopyWebpackPlugin([
-                {
-                    from: "src/",
-                    ignore:["assets/**/*", "css/**/*", "js/**/*", "*.html", ".gitkeep"]
-                }
-            ])
-        ]
+                new PurifyCSSPlugin({
+                    paths: glob.sync([
+                        path.join(__dirname, "src/*.html"),
+                        path.join(__dirname, "src/js/*.js")
+                    ]),
+                    minimize: true
+                }),
+                new CopyWebpackPlugin([
+                    {
+                        from: "src/",
+                        ignore: ["assets/**/*", "css/**/*", "js/**/*", "*.html", ".gitkeep"]
+                    }
+                ])
+            ]
     ),
     devServer: {
         //open: true, // Uncomment/Comment `open` if not using/using Browser-sync-plugin
