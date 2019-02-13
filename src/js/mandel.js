@@ -44,12 +44,12 @@ function getSteps(start, distance, numPoints) {
     return R.unfold(stepper, { val: start, step: 0 });
 }
 
-function getMandelGridPoints(canvasRect, mandelRect) {
+const getMandelGridPoints = R.curry((canvasRect, mandelRect) => {
     return {
         mandelGridXpoints: getSteps(mandelRect.left, mandelRect.width, canvasRect.width),
         mandelGridYpoints: getSteps(mandelRect.top, -mandelRect.height, canvasRect.height)
     };
-}
+});
 
 function getCanvas() {
     return document.getElementById("mandelcanvas");
@@ -106,7 +106,7 @@ function updateCanvas(canvasContext, canvasData) {
 }
 
 function augmentWithStartRowIndexes(jobs) {
-    const rowIndexer = (acc, val) => [acc + val.length, { startRow: acc, array: val }];
+    const rowIndexer = (acc, val) => [acc + val.array.length, R.mergeLeft(val, { startRow: acc })];
     return R.mapAccum(rowIndexer, 0, jobs)[1];
 }
 
@@ -122,41 +122,39 @@ function drawDots(mandelRect) {
     const canvasData = ctx.getImageData(0, 0, width, height);
     const canvasRect = new Rectangle(0, 0, width, height);
 
-    const gridPoints = getMandelGridPoints(canvasRect, mandelRect);
-
-    const jobs = getJobs(gridPoints, maxThreads);
-
-    const jobsWithStartRowIndexes = augmentWithStartRowIndexes(jobs);
-
-    const workerParams = jobsWithStartRowIndexes.map(job => {
-        return {
-            startRow: job.startRow,
-            array: job.array,
-            gridPoints: gridPoints,
-            maxIterations: maxIterations
-        };
-    });
+    const workerParams = R.pipe(getMandelGridPoints(canvasRect),
+        getJobs(maxThreads),
+        augmentWithStartRowIndexes,
+        R.map(job => {
+            return R.mergeLeft(job, { maxIterations: maxIterations });
+        }))(mandelRect);
 
     R.forEach(p => {
         let w = new Worker();
         w.postMessage(p);
         w.onmessage = (event) => {
 
-            const startRow = event.data[0];
-            const mandelRows = event.data[1];
-            const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRow + canvasY, row));
-            const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
-            R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelRows);
-            updateCanvas(ctx, canvasData);
+            const startRowIndex = event.data[0];
+            const mandelChunk = event.data[1];
+            drawChunk(canvasData, ctx, mandelChunk, startRowIndex);
         };
     })(workerParams);
 }
 
-const getJobs = (gridPoints, numWorkers) => {
+const drawChunk = (canvasData, ctx, mandelChunk, startRowIndex) => {
+
+    const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRowIndex + canvasY, row));
+    const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
+    R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelChunk);
+    updateCanvas(ctx, canvasData);
+};
+
+const getJobs = R.curry((numWorkers, gridPoints) => {
 
     const rowsPerWorker = Math.round(gridPoints.mandelGridYpoints.length / numWorkers) + 1;
-    return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints);
-};
+    return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints)
+        .map(job => { return { array: job, gridPoints: gridPoints }; });
+});
 
 window.goDrawDots = function goDrawDots() {
     drawDots(mandelRect);
