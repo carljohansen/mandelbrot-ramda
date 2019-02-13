@@ -105,24 +105,28 @@ function updateCanvas(canvasContext, canvasData) {
     canvasContext.putImageData(canvasData, 0, 0);
 }
 
+function augmentWithStartRowIndexes(jobs) {
+    const rowIndexer = (acc, val) => [acc + val.length, { startRow: acc, array: val }];
+    return R.mapAccum(rowIndexer, 0, jobs)[1];
+}
+
 function drawDots(mandelRect) {
 
     const maxIterations = 5000;
     const maxThreads = 4;
-    
-    var c = getCanvas();
+
+    const c = getCanvas();
     var width, height;
     ({ width, height } = getCanvasDimensions(c));
-    var ctx = c.getContext("2d");
-    var canvasData = ctx.getImageData(0, 0, width, height);
+    const ctx = c.getContext("2d");
+    const canvasData = ctx.getImageData(0, 0, width, height);
     const canvasRect = new Rectangle(0, 0, width, height);
 
     const gridPoints = getMandelGridPoints(canvasRect, mandelRect);
 
-    var jobs = getJobs(gridPoints, maxThreads);
+    const jobs = getJobs(gridPoints, maxThreads);
 
-    const rowIndexer = (acc, val) => [acc + val.length, { startRow: acc, array: val }];
-    const jobsWithStartRowIndexes = R.mapAccum(rowIndexer, 0, jobs)[1];
+    const jobsWithStartRowIndexes = augmentWithStartRowIndexes(jobs);
 
     const workerParams = jobsWithStartRowIndexes.map(job => {
         return {
