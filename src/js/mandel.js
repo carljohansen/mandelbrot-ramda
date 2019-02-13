@@ -4,6 +4,8 @@ const R = require("ramda");
 
 import Worker from "./calcmandel.worker.js";
 
+var mandelRect;
+
 const mapIndexed = R.addIndex(R.map);
 
 class Point {
@@ -49,8 +51,6 @@ function getMandelGridPoints(canvasRect, mandelRect) {
     };
 }
 
-var mandelRect;
-
 function getCanvas() {
     return document.getElementById("mandelcanvas");
 }
@@ -78,22 +78,23 @@ const drawRow = R.curry((canvasData, canvasY, colours) => {
     setCanvasRowPixels(colours);
 });
 
-function projectMandelSelectionRect(canvasSelectionRect) {
+function projectMandelSelectionRect(canvasSelectionRect, currMandelRect) {
     const c = getCanvas();
     var width, height;
     ({ width, height } = getCanvasDimensions(c));
 
     const canvasRect = new Rectangle(0, 0, width, height);
-    const topLeft = mandelRect.projectPointInvertedVertical(new Point(canvasSelectionRect.left, canvasSelectionRect.top), canvasRect);
-    const widthHeight = mandelRect.projectVectorInvertedVertical(new Point(canvasSelectionRect.width, canvasSelectionRect.height), canvasRect);
+    const topLeft = currMandelRect.projectPointInvertedVertical(new Point(canvasSelectionRect.left, canvasSelectionRect.top), canvasRect);
+    const widthHeight = currMandelRect.projectVectorInvertedVertical(new Point(canvasSelectionRect.width, canvasSelectionRect.height), canvasRect);
 
     return new Rectangle(topLeft.x, topLeft.y, widthHeight.x, widthHeight.y);
 }
 
 function zoom(canvasSelectionRect) {
 
-    const newMandelRect = projectMandelSelectionRect(canvasSelectionRect);
+    const newMandelRect = projectMandelSelectionRect(canvasSelectionRect, mandelRect);
     mandelRect = newMandelRect;
+    window.goDrawDots();
 }
 
 function resetMandelRect() {
@@ -106,16 +107,15 @@ function updateCanvas(canvasContext, canvasData) {
 
 function drawDots(mandelRect) {
 
+    const maxIterations = 5000;
+    const maxThreads = 4;
+    
     var c = getCanvas();
     var width, height;
     ({ width, height } = getCanvasDimensions(c));
     var ctx = c.getContext("2d");
     var canvasData = ctx.getImageData(0, 0, width, height);
-
     const canvasRect = new Rectangle(0, 0, width, height);
-
-    const maxIterations = 5000;
-    const maxThreads = 4;
 
     const gridPoints = getMandelGridPoints(canvasRect, mandelRect);
 
@@ -132,7 +132,7 @@ function drawDots(mandelRect) {
             maxIterations: maxIterations
         };
     });
-    
+
     R.forEach(p => {
         let w = new Worker();
         w.postMessage(p);
@@ -154,81 +154,11 @@ const getJobs = (gridPoints, numWorkers) => {
     return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints);
 };
 
-//---------------------------------------------------------
-
-initDraw(getCanvas());
-
-function initDraw(canvas) {
-    function setMousePosition(e) {
-        var ev = e || window.event; //Moz || IE
-        if (ev.pageX) { //Moz
-            mouse.x = ev.offsetX; //ev.pageX + window.pageXOffset;
-            mouse.y = ev.offsetY; // ev.pageY + window.pageYOffset;
-        } else if (ev.clientX) { //IE
-            mouse.x = ev.clientX + document.body.scrollLeft;
-            mouse.y = ev.clientY + document.body.scrollTop;
-        }
-    }
-
-    var mouse = {
-        x: 0,
-        y: 0,
-        startX: 0,
-        startY: 0
-    };
-
-    var element = null;
-
-    canvas.onmousemove = function (e) {
-        setMousePosition(e);
-        if (element !== null) {
-            element.style.width = Math.abs(mouse.x - mouse.startX) + "px";
-            element.style.height = Math.abs(mouse.y - mouse.startY) + "px";
-            element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + "px" : mouse.startX + "px";
-            element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + "px" : mouse.startY + "px";
-        }
-    };
-
-    const normaliseCanvasRegionRect = (regionRect) => {
-        const canvas = getCanvas();
-        return regionRect; //regionRect.translate(-canvas.offsetLeft, -canvas.offsetTop);
-    };
-
-    const fixCanvasRegionAspectRatio = (regionRect) => {
-        const canvas = getCanvas();
-        const canvasAspectRatio = canvas.width / canvas.height;
-        if (regionRect.width < regionRect.height) {
-            return new Rectangle(regionRect.left, regionRect.top, regionRect.width, Math.round(regionRect.width / canvasAspectRatio));
-        } else {
-            return new Rectangle(regionRect.left, regionRect.top, Math.round(regionRect.height * canvasAspectRatio), regionRect.height);
-        }
-    };
-
-    canvas.onclick = function (e) {
-        if (element !== null) {
-            const rawSelectionRect = new Rectangle(parseInt(element.style.left), parseInt(element.style.top), parseInt(element.style.width), parseInt(element.style.height));
-            const canvasRelativeSelectionRect = R.pipe(normaliseCanvasRegionRect, fixCanvasRegionAspectRatio)(rawSelectionRect);
-            zoom(canvasRelativeSelectionRect);
-            drawDots(mandelRect);
-            element = null;
-            canvas.style.cursor = "default";
-        } else {
-            mouse.startX = mouse.x;
-            mouse.startY = mouse.y;
-            element = document.createElement("div");
-            element.className = "rectangle";
-            element.style.left = mouse.x + "px";
-            element.style.top = mouse.y + "px";
-            canvas.appendChild(element);
-            canvas.style.cursor = "crosshair";
-        }
-    };
-}
-//---------------------------------------------------------
-
 window.goDrawDots = function goDrawDots() {
     drawDots(mandelRect);
 };
 
+module.exports = { getCanvas: getCanvas, Rectangle: Rectangle, zoom: zoom };
+
 resetMandelRect();
-drawDots(mandelRect);
+window.goDrawDots();
