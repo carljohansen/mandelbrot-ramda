@@ -122,32 +122,35 @@ function drawDots(mandelRect) {
     const canvasData = ctx.getImageData(0, 0, width, height);
     const canvasRect = new Rectangle(0, 0, width, height);
 
-    const workerParams = R.pipe(getMandelGridPoints(canvasRect),
-        getJobs(maxThreads),
-        augmentWithStartRowIndexes,
-        R.map(job => {
-            return R.mergeLeft(job, { maxIterations: maxIterations });
-        }))(mandelRect);
-
-    R.forEach(p => {
+    const startCalcWorker = (mandelJob) => {
         let w = new Worker();
-        w.postMessage(p);
+        w.postMessage(mandelJob);
         w.onmessage = (event) => {
 
             const startRowIndex = event.data[0];
             const mandelChunk = event.data[1];
-            drawChunk(canvasData, ctx, mandelChunk, startRowIndex);
+            drawChunk(mandelChunk, startRowIndex);
         };
-    })(workerParams);
+    };
+
+    const drawChunk = (mandelChunk, startRowIndex) => {
+
+        const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRowIndex + canvasY, row));
+        const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
+        R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelChunk);
+        updateCanvas(ctx, canvasData);
+    };
+
+    const augmentWithMaxIterations = (job) => {
+        return R.mergeLeft(job, { maxIterations: maxIterations });
+    };
+
+    R.pipe(getMandelGridPoints(canvasRect),
+        getJobs(maxThreads),
+        augmentWithStartRowIndexes,
+        R.map(augmentWithMaxIterations),
+        R.forEach(startCalcWorker))(mandelRect);
 }
-
-const drawChunk = (canvasData, ctx, mandelChunk, startRowIndex) => {
-
-    const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRowIndex + canvasY, row));
-    const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
-    R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelChunk);
-    updateCanvas(ctx, canvasData);
-};
 
 const getJobs = R.curry((numWorkers, gridPoints) => {
 
