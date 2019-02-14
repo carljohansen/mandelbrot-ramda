@@ -105,7 +105,7 @@ function updateCanvas(canvasContext, canvasData) {
     canvasContext.putImageData(canvasData, 0, 0);
 }
 
-function augmentWithStartRowIndexes(jobs) {
+function augmentJobsWithStartRowIndexes(jobs) {
     const rowIndexer = (acc, val) => [acc + val.array.length, R.mergeLeft(val, { startRow: acc })];
     return R.mapAccum(rowIndexer, 0, jobs)[1];
 }
@@ -135,28 +135,32 @@ function drawDots(mandelRect) {
 
     const drawChunk = (mandelChunk, startRowIndex) => {
 
-        const indexMandelRow = mapIndexed((row, canvasY) => R.pair(startRowIndex + canvasY, row));
-        const drawRowToCanvasData = yAndCols => drawRow(canvasData, yAndCols[0], yAndCols[1][1]);
-        R.pipe(indexMandelRow, R.forEach(drawRowToCanvasData))(mandelChunk);
+        const indexMandelRow = mapIndexed((row, canvasY) => { return { rowIndex: startRowIndex + canvasY, colours: row[1] }; });
+        const drawRowToCanvasData = rowColours => drawRow(canvasData, rowColours.rowIndex, rowColours.colours);
+
+        R.pipe(indexMandelRow,
+            R.forEach(drawRowToCanvasData))(mandelChunk);
+            
         updateCanvas(ctx, canvasData);
     };
 
-    const augmentWithMaxIterations = (job) => {
-        return R.mergeLeft(job, { maxIterations: maxIterations });
-    };
-
     R.pipe(getMandelGridPoints(canvasRect),
-        getJobs(maxThreads),
-        augmentWithStartRowIndexes,
-        R.map(augmentWithMaxIterations),
+        getJobs(maxThreads, maxIterations),
+        augmentJobsWithStartRowIndexes,
         R.forEach(startCalcWorker))(mandelRect);
 }
 
-const getJobs = R.curry((numWorkers, gridPoints) => {
+const getJobs = R.curry((numWorkers, maxIterations, gridPoints) => {
 
     const rowsPerWorker = Math.round(gridPoints.mandelGridYpoints.length / numWorkers) + 1;
     return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints)
-        .map(job => { return { array: job, gridPoints: gridPoints }; });
+        .map(rowChunk => {
+            return {
+                array: rowChunk,
+                gridPoints: gridPoints,
+                maxIterations: maxIterations
+            };
+        });
 });
 
 window.goDrawDots = function goDrawDots() {
