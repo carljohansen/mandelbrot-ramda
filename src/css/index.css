@@ -25,8 +25,14 @@
 
 .maincontainer { margin:10px;}
 
+#selectorOverlay {
+  position:absolute; 
+  z-index: 99;
+}
+
 .rectangle {
   border: 1px solid #FF0000;
   position: absolute;
+  pointer-events: none;
   z-index: 99;
 }
