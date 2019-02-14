@@ -40,8 +40,7 @@ class Rectangle {
 function getSteps(start, distance, numPoints) {
 
     const increment = distance / (numPoints - 1);
-    const stepper = n => (n.step === numPoints) ? false : [n.val, { val: n.val + increment, step: n.step + 1 }];
-    return R.unfold(stepper, { val: start, step: 0 });
+    return R.range(0, numPoints).map(n => n * increment + start);
 }
 
 const getMandelGridPoints = R.curry((canvasRect, mandelRect) => {
@@ -140,7 +139,7 @@ function drawDots(mandelRect) {
 
         R.pipe(indexMandelRow,
             R.forEach(drawRowToCanvasData))(mandelChunk);
-            
+
         updateCanvas(ctx, canvasData);
     };
 
