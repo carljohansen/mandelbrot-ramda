@@ -46,12 +46,9 @@ const getChunkOfMandelRows = (maxIterations, startRow, mandelGridXpoints, mandel
 self.addEventListener("message", (event) => {
 
     var params = event.data;
-
     const mandelYpoints = params.array;
 
-    // const result = mapIndexed((mandelGridY, canvasY) => getMandelRowWithIndex(params.maxIterations, params.gridPoints.mandelGridXpoints, canvasY, mandelGridY))(mandelYpoints);
-
-    // self.postMessage(R.pair(params.startRow, result));
     const result = getChunkOfMandelRows(params.maxIterations, params.startRow, params.gridPoints.mandelGridXpoints, mandelYpoints);
+    
     self.postMessage(result);
 });
