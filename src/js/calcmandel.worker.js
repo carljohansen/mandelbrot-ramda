@@ -37,10 +37,9 @@ const getMandelRowWithIndex = R.curry((maxIterations, mandelXs, canvasY, mandelY
     return R.pair(canvasY, rowColours);
 });
 
-const getChunkOfMandelRows = (maxIterations, startRow, mandelGridXpoints, mandelGridYPoints) => {
+const getChunkOfMandelRows = (maxIterations, mandelGridXpoints, mandelGridYPoints) => {
 
-    const result = mapIndexed((mandelGridY, canvasY) => getMandelRowWithIndex(maxIterations, mandelGridXpoints, canvasY, mandelGridY))(mandelGridYPoints);
-    return R.pair(startRow, result);
+    return mapIndexed((mandelGridY, canvasY) => getMandelRowWithIndex(maxIterations, mandelGridXpoints, canvasY, mandelGridY))(mandelGridYPoints);
 };
 
 self.addEventListener("message", (event) => {
@@ -48,7 +47,7 @@ self.addEventListener("message", (event) => {
     var params = event.data;
     const mandelYpoints = params.array;
 
-    const result = getChunkOfMandelRows(params.maxIterations, params.startRow, params.gridPoints.mandelGridXpoints, mandelYpoints);
-    
+    const result = getChunkOfMandelRows(params.maxIterations, params.gridPoints.mandelGridXpoints, mandelYpoints);
+
     self.postMessage(result);
 });

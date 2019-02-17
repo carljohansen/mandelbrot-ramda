@@ -104,11 +104,6 @@ function updateCanvas(canvasContext, canvasData) {
     canvasContext.putImageData(canvasData, 0, 0);
 }
 
-function augmentJobsWithStartRowIndexes(jobs) {
-    const rowIndexer = (acc, val) => [acc + val.array.length, R.mergeLeft(val, { startRow: acc })];
-    return R.mapAccum(rowIndexer, 0, jobs)[1];
-}
-
 function drawDots(mandelRect) {
 
     const maxIterations = 5000;
@@ -126,15 +121,14 @@ function drawDots(mandelRect) {
         w.postMessage(mandelJob);
         w.onmessage = (event) => {
 
-            const startRowIndex = event.data[0];
-            const mandelChunk = event.data[1];
-            drawChunk(mandelChunk, startRowIndex);
+            const mandelChunk = event.data;
+            drawChunk(mandelChunk, mandelJob.firstRowIndex, maxThreads);
         };
     };
 
-    const drawChunk = (mandelChunk, startRowIndex) => {
+    const drawChunk = (mandelChunk, firstRowIndex, rowSeparation) => {
 
-        const indexMandelRow = mapIndexed((row, canvasY) => { return { rowIndex: startRowIndex + canvasY, colours: row[1] }; });
+        const indexMandelRow = mapIndexed((row, canvasY) => { return { rowIndex: firstRowIndex + (rowSeparation * canvasY), colours: row[1] }; });
         const drawRowToCanvasData = rowColours => drawRow(canvasData, rowColours.rowIndex, rowColours.colours);
 
         R.pipe(indexMandelRow,
@@ -145,21 +139,25 @@ function drawDots(mandelRect) {
 
     R.pipe(getMandelGridPoints(canvasRect),
         getJobs(maxThreads, maxIterations),
-        augmentJobsWithStartRowIndexes,
         R.forEach(startCalcWorker))(mandelRect);
 }
 
+const filterIndexed = R.addIndex(R.filter);
+
 const getJobs = R.curry((numWorkers, maxIterations, gridPoints) => {
 
-    const rowsPerWorker = Math.round(gridPoints.mandelGridYpoints.length / numWorkers) + 1;
-    return R.splitEvery(rowsPerWorker, gridPoints.mandelGridYpoints)
-        .map(rowChunk => {
+    const everyNthElement = (n, first) => filterIndexed((_, idx) => idx % n === first);
+    const getWorkerRows = workerId => everyNthElement(numWorkers, workerId);
+
+    return R.pipe(R.map(workerId => getWorkerRows(workerId)(gridPoints.mandelGridYpoints)),
+        mapIndexed((rowChunk, firstRowIndex) => {
             return {
+                firstRowIndex: firstRowIndex,
                 array: rowChunk,
                 gridPoints: gridPoints,
                 maxIterations: maxIterations
             };
-        });
+        }))(R.range(0, numWorkers));
 });
 
 window.goDrawDots = function goDrawDots() {
