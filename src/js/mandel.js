@@ -54,6 +54,10 @@ function getCanvas() {
     return document.getElementById("mandelcanvas");
 }
 
+function getSelectorOverlay() {
+    return document.getElementById("selectorOverlay");
+}
+
 function getCanvasDimensions(canvas) {
     return { width: canvas.width, height: canvas.height };
 }
@@ -102,6 +106,7 @@ function resetMandelRect() {
 
 function updateCanvas(canvasContext, canvasData) {
     canvasContext.putImageData(canvasData, 0, 0);
+    getSelectorOverlay().style.cursor = "crosshair";
 }
 
 function drawDots(mandelRect) {
@@ -142,6 +147,11 @@ function drawDots(mandelRect) {
         R.forEach(startCalcWorker))(mandelRect);
 }
 
+function drawDotsWithHourglass(mandelRect) {
+    getSelectorOverlay().style.cursor = "wait";
+    drawDots(mandelRect);
+}
+
 const filterIndexed = R.addIndex(R.filter);
 
 const getJobs = R.curry((numWorkers, maxIterations, gridPoints) => {
@@ -161,10 +171,14 @@ const getJobs = R.curry((numWorkers, maxIterations, gridPoints) => {
 });
 
 window.goDrawDots = function goDrawDots() {
-    drawDots(mandelRect);
+    drawDotsWithHourglass(mandelRect);
 };
 
-module.exports = { getCanvas: getCanvas, Rectangle: Rectangle, zoom: zoom };
+window.reset = function () {
+    resetMandelRect();
+    window.goDrawDots();
+};
 
-resetMandelRect();
-window.goDrawDots();
+module.exports = { getCanvas: getCanvas, getSelectorOverlay: getSelectorOverlay, Rectangle: Rectangle, zoom: zoom };
+
+window.reset();

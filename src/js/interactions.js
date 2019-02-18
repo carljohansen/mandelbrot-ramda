@@ -1,9 +1,4 @@
-const R = require("ramda");
-import { getCanvas, zoom, Rectangle } from "./mandel.js";
-
-function getSelectorOverlay() {
-    return document.getElementById("selectorOverlay");
-}
+import { getCanvas, getSelectorOverlay, zoom, Rectangle } from "./mandel.js";
 
 function initSelectorOverlay(canvas, selectorOverlay) {
 
@@ -37,8 +32,11 @@ function initDraw(canvas, selectorOverlay) {
     selectorOverlay.onmousemove = function (e) {
         setMousePosition(e);
         if (element !== null) {
-            element.style.width = Math.abs(mouse.x - mouse.startX) + "px";
-            element.style.height = Math.abs(mouse.y - mouse.startY) + "px";
+            const rawWidth = Math.abs(mouse.x - mouse.startX);
+            const rawHeight = Math.abs(mouse.y - mouse.startY);
+            const squareSize = Math.min(rawWidth, rawHeight);
+            element.style.width = squareSize + "px";
+            element.style.height = squareSize + "px";
             element.style.left = Math.min(mouse.x, mouse.startX) + "px";
             element.style.top = Math.min(mouse.y, mouse.startY) + "px";
         }
@@ -54,24 +52,24 @@ function initDraw(canvas, selectorOverlay) {
         }
     };
 
-    selectorOverlay.onclick = function (e) {
-        if (element !== null) {
-            const rawSelectionRect = new Rectangle(parseInt(element.style.left), parseInt(element.style.top), parseInt(element.style.width), parseInt(element.style.height));
-            const canvasRelativeSelectionRect = fixCanvasRegionAspectRatio(rawSelectionRect);
+    selectorOverlay.onmousedown = function () {
+        mouse.startX = mouse.x;
+        mouse.startY = mouse.y;
+        element = document.createElement("div");
+        element.className = "rectangle";
+        element.style.left = mouse.x + "px";
+        element.style.top = mouse.y + "px";
+        selectorOverlay.appendChild(element);
+    };
+
+    selectorOverlay.onmouseup = function () {
+        const rawSelectionRect = new Rectangle(parseInt(element.style.left), parseInt(element.style.top), parseInt(element.style.width), parseInt(element.style.height));
+        const canvasRelativeSelectionRect = fixCanvasRegionAspectRatio(rawSelectionRect);
+        if (canvasRelativeSelectionRect.width > 10) {
             zoom(canvasRelativeSelectionRect);
-            selectorOverlay.removeChild(element);
-            element = null;
-            selectorOverlay.style.cursor = "default";
-        } else {
-            mouse.startX = mouse.x;
-            mouse.startY = mouse.y;
-            element = document.createElement("div");
-            element.className = "rectangle";
-            element.style.left = mouse.x + "px";
-            element.style.top = mouse.y + "px";
-            selectorOverlay.appendChild(element);
-            selectorOverlay.style.cursor = "crosshair";
         }
+        selectorOverlay.removeChild(element);
+        element = null;
     };
 }
 
