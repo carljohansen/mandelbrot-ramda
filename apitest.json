@@ -1,0 +1,922 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "UDE from Octopus",
+    "version" : "2020-04-23"
+  },
+  "servers" : [ {
+    "url" : "https://our_url_goes_here"
+  } ],
+  "paths" : {
+    "/v1/investigation/assess/duns/{duns}/{RegionCode}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "duns",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/{param}" : {
+      "post" : {
+        "parameters" : [ {
+          "name" : "param",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobinstance/{id}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/entity/{ContentType}/{RegionCode}/{EntityId}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "EntityId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "ContentType",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ {
+          "name" : "EntityId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "ContentType",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/jobinstance/{JobInstanceId}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "JobInstanceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/jobinstance/recent" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobinstance/recent" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/auth/authenticate" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "RefreshToken",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/investigation/{invkey}/{RegionCode}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "invkey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/entity/{ContentType}/{RegionCode}/job/{JobToken}" : {
+      "post" : {
+        "parameters" : [ {
+          "name" : "JobToken",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "ContentType",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/investigation/fulfill/{invkey}/{RegionCode}" : {
+      "post" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "invkey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/investigation/applyduns/{RegionCode}/{InvKey}/{Duns}" : {
+      "post" : {
+        "description" : "### Notes\r\n\r\nChanges the Duns associated with the investigation (and all its tickets).  This will never result in the creation of a new investigation, but it might  result in the tickets being moved to a different investigation.  If an active investigation exists for the target Duns (with the same investigation group as the specified investigation) then the tickets will be moved and the specified investigation will be left with no active tickets (and will therefore be moved to audit).\r\n",
+        "parameters" : [ {
+          "name" : "InvKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Duns",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/investigation/assess/{RegionCode}/{InvKey}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "InvKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/investigations/{RegionCode}" : {
+      "get" : {
+        "description" : "### Parameters\r\n\r\n- **Filter** - _(optional)_ finds investigations that meet specific criteria.\r\n- **Sort** - _(optional)_ The Investigation property by which the results are ordered. Prefix it with a minus to sort in descending order. For example **-InvestigationDate**\r\n- **Skip** - _(optional)_ The number of matching investigations to be omitted from the top of the result. Used to split large result sets into pages. Set to zero to retrieve investigations starting from the first investigation.\r\n- **Take** - The number of matching investigations to be returned. There is no default for this parameter; you _must_ specify a Take value. A large number might cause the search to fail.\r\n- **RegionCode** - e.g. CHN\r\n- **SearchClosedInvestigations** - _(optional)_ Set to **false** to search only the active investigations. Set to **true** to search only the closed investigations. The default is false.\r\n- **Inclusions** - _(optional)_ The elements of the Investigation graph to be emitted in the result. The most common values are\r\n- **`<empty`>** - Only the investigation properties are emitted; no ticket details are included.\r\n- **Ticket** - The investigation and ticket properties are emitted.\r\n- **All** - As for &quot;Ticket&quot;, but also includes reference data for the tickets&#39; Product and Country properties.\r\n\r\n### Notes\r\n\r\nIf you are going to use paging (the Skip parameter) then you _must_ specify a sort order (the Sort parameter).\r\n\r\nMost of the parameters are simple and self-explanatory, but Filter is not. There are a huge number of possible filters and a detailed explanation requires a separate document. However, there are several simple filters that cover many of the common requirements:\r\n\r\n```C#\r\ninvestigation.InvestigationKey == \"201806268098090057\"\r\ninvestigation.Name.StartsWith(\"Smith\")\r\n!string.IsNullOrEmpty(investigation.Comments)\r\ninvestigation.DataEntryOperatorInDate != NullDateValue\r\ninvestigation.ClosedTickets.Any()\r\n```\r\n",
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/auth/refresh" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/investigation/assess/{invkey}/{RegionCode}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "invkey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Content-Type" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        }
+      }
+    },
+    "/v2/entity/{ContentType}/{RegionCode}/duns/{Duns}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "ContentType",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Duns",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/authenticate" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/ticket/hip/{RegionCode}/{TicketKey}/duns/{Duns}" : {
+      "post" : {
+        "description" : "### Parameters\r\n\r\n- **ForceInvestigation** - Set to **true** to guarantee that the hipped ticket will end up in an investigation. Set to **false** to allow the ticket to be fulfilled if it is AFF.\r\n- **Verbose -** Set to **true** to emit a detailed description of the steps performed by\r\n- **WhatIfMode -** Set to **true** to prevent any changes from being stored. In What If mode the Hip method shows what _would_ happen but does not actually apply it. Always set Verbose to true when setting WhatIfMode to true.\r\n\r\n### Notes\r\n\r\nThe hip method changes the Duns of a single active ticket in a &#39;safe&#39; way. The main safety feature is that it enforces the rule that there cannot be more than one active investigation for a particular Duns (unless the investigations are all for products in different investigation groups). This rule guides its chosen strategy, which will be one of the following:\r\n\r\n1. Change the Duns of the ticket and its parent investigation directly.\r\n2. Move the ticket to another active investigation.\r\n3. Create a new active investigation and move the ticket to it.\r\n",
+        "parameters" : [ {
+          "name" : "TicketKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Duns",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/ticket/{RegionCode}/{TicketKey}" : {
+      "delete" : {
+        "description" : "### Parameters\r\n\r\n- **AdjustmentComment** - _(optional)_ some free text (max 61 chars) that will be stored in the contract credit adjustment if one is created. Note that if no contract credit adjustment is created then the comment text will not be stored anywhere.\r\n- **AuthorisingUserId** - _(optional)_ an integer ID that will be stored in the contract credit adjustment (in the Authorisor\\_key column) if one is created. Note that if no contract credit adjustment is created then the authorising user ID will not be stored anywhere. Note also that there is no validation of this value.\r\n\r\n### Notes\r\n\r\nThis method can be used to delete an active ticket or a closed ticket. It will first try to find the ticket in the active tickets and will then search the closed tickets if no matching active ticket is found.\r\n\r\nThe deletion is a soft delete. The ticket is added to the ticket33\\_deleted table at the same time as it is removed from the ticket33\\_master or ticket33\\_audit table.\r\n\r\nIf appropriate, an adjustment record will be created in the SUB database to record a credit for the deleted ticket.\r\n",
+        "parameters" : [ {
+          "name" : "TicketKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/jobinstance/recent/{JobToken}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "JobToken",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/investigation/fulfill/{RegionCode}/{InvKey}" : {
+      "post" : {
+        "description" : "### Parameters\r\n\r\n- **OverrideChecks** - _(optional)_ if set to true, causes the fulfillment process to proceed without any AFF checks. All included tickets will be moved to audit, even if they are not AFF.\r\n- **IncludedTicketKeys** - _(optional)_ a comma-separated list of one or more ticket keys. If specified, limits the fulfillment process to the specified active tickets. These must be keys of active tickets in the investigation. If not specified then all active tickets are included in the fulfillment process.\r\n\r\n### Notes\r\n\r\nThis method can be used only on active investigations. It moves the investigation&#39;s active tickets from master to audit. Unless OverrideChecks is set to true, the availability assessment will be performed and only those tickets that pass the AFF check will be moved from master to audit.\r\n\r\nIf, after the tickets have been processed, the investigation has no active tickets remaining then the investigation itself will be moved from master to audit.\r\n",
+        "parameters" : [ {
+          "name" : "InvKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/ticket/resendreport/{RegionCode}/{TicketKey}" : {
+      "post" : {
+        "description" : "### Parameters\r\n\r\n- **EMail** - _(optional)_ the email address to which the report will be sent. If this is not specified then the ticket&#39;s original email address will be used.\r\n\r\n### Notes\r\n\r\nThis method can be used only on closed tickets. It resets the ticket&#39;s delivery properties so that it goes through its delivery process again. It sets the &#39;delivery method&#39; to &quot;email&quot; so that the resend operation is always an email delivery.\r\n",
+        "parameters" : [ {
+          "name" : "TicketKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/{param}/{RegionCode}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "param",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "param",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "400 response",
+            "content" : { }
+          },
+          "401" : {
+            "description" : "401 response",
+            "content" : { }
+          },
+          "500" : {
+            "description" : "500 response",
+            "content" : { }
+          }
+        }
+      }
+    },
+    "/v2/investigation/{RegionCode}/{InvKey}" : {
+      "get" : {
+        "description" : "### Parameters\r\n\r\n- **Inclusions** - _(optional)_ The elements of the Investigation graph to be emitted in the result. The most common values are\r\n- **`<empty`>** - Only the investigation properties are emitted; no ticket details are included.\r\n- **Ticket** - The investigation and ticket properties are emitted.\r\n- **All** - As for &quot;Ticket&quot;, but also includes reference data for the tickets&#39; Product and Country properties.\r\n\r\n### Notes\r\n\r\nThis method retrieves the details of a single active investigation.  Only active investigations can be retrieved.  To retreive a closed investigation, use the /investigations endpoint with these parameters:\r\n\r\n* Filter: investigation.InvestigationKey == \"{key}\"\r\n* SearchClosedInvestigations: true\r\n* Skip: 0\r\n* Take: 1\r\n",
+        "parameters" : [ {
+          "name" : "InvKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/investigation/fulfill/duns/{duns}/{RegionCode}" : {
+      "post" : {
+        "parameters" : [ {
+          "name" : "duns",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "RegionCode",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "type" : "object"
+      }
+    }
+  },
+  "x-amazon-apigateway-policy" : {
+    "Version" : "2012-10-17",
+    "Statement" : [ {
+      "Effect" : "Deny",
+      "Principal" : "*",
+      "Action" : "execute-api:Invoke",
+      "Resource" : "arn:aws:execute-api:ap-southeast-2:*:s7k9x63k95/*",
+      "Condition" : {
+        "NotIpAddress" : {
+          "aws:SourceIp" : [ "101.110.48.73", "101.110.48.65", "158.151.0.0/16", "159.137.48.0/20", "159.137.146.109", "10.10.220.0/24", "10.10.221.0/24", "10.10.222.0/24", "172.22.255.192/27", "10.42.0.0/16", "172.22.255.192/27" ]
+        }
+      }
+    }, {
+      "Effect" : "Allow",
+      "Principal" : "*",
+      "Action" : "execute-api:Invoke",
+      "Resource" : "arn:aws:execute-api:ap-southeast-2:*:s7k9x63k95/*"
+    } ]
+  }
+}
