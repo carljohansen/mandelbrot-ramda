@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* eslint-disable no-debugger */
 /* eslint-disable no-undef */
 const R = require("ramda");

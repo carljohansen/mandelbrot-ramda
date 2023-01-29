@@ -1,8 +1,7 @@
+/* eslint-disable */
 /* eslint-disable no-debugger */
 /* eslint-disable no-undef */
 const R = require("ramda");
-
-import Worker from "./calcmandel.worker.js";
 
 var mandelRect;
 
@@ -15,7 +14,7 @@ class Point {
     }
 }
 
-class Rectangle {
+export class Rectangle {
     constructor(left, top, width, height) {
         this.left = left;
         this.top = top;
@@ -50,11 +49,11 @@ const getMandelGridPoints = R.curry((canvasRect, mandelRect) => {
     };
 });
 
-function getCanvas() {
+export function getCanvas() {
     return document.getElementById("mandelcanvas");
 }
 
-function getSelectorOverlay() {
+export function getSelectorOverlay() {
     return document.getElementById("selectorOverlay");
 }
 
@@ -93,7 +92,7 @@ function projectMandelSelectionRect(canvasSelectionRect, currMandelRect) {
     return new Rectangle(topLeft.x, topLeft.y, widthHeight.x, widthHeight.y);
 }
 
-function zoom(canvasSelectionRect) {
+export function zoom(canvasSelectionRect) {
 
     const newMandelRect = projectMandelSelectionRect(canvasSelectionRect, mandelRect);
     mandelRect = newMandelRect;
@@ -122,7 +121,7 @@ function drawDots(mandelRect) {
     const canvasRect = new Rectangle(0, 0, width, height);
 
     const startCalcWorker = (mandelJob) => {
-        let w = new Worker();
+        let w = new Worker(new URL('./calcmandel.worker.js', import.meta.url));
         w.postMessage(mandelJob);
         w.onmessage = (event) => {
 
@@ -178,7 +177,5 @@ window.reset = function () {
     resetMandelRect();
     window.goDrawDots();
 };
-
-module.exports = { getCanvas: getCanvas, getSelectorOverlay: getSelectorOverlay, Rectangle: Rectangle, zoom: zoom };
 
 window.reset();

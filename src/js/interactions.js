@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getCanvas, getSelectorOverlay, zoom, Rectangle } from "./mandel.js";
 
 function initSelectorOverlay(canvas, selectorOverlay) {
