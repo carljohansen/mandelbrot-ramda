@@ -66,17 +66,18 @@ const drawRow = R.curry((canvasData, canvasY, colours) => {
     const canvasWidth = colours.length;
 
     const rowIndex = canvasY * canvasWidth * 4;
-    const getIndex = x => rowIndex + x * 4;
+    const getIndex = x => rowIndex + x * 4;  // int -> int
 
+    // int -> colour -> void
     const drawPixel = R.curry((index, colour) => {
         canvasData.data[index + 0] = colour.r;
         canvasData.data[index + 1] = colour.g;
         canvasData.data[index + 2] = colour.b;
-        canvasData.data[index + 3] = colour.a;
+        canvasData.data[index + 3] = 255;
     });
 
-    const setCanvasPixelColour = R.pipe(getIndex, drawPixel);
-    const setCanvasRowPixels = mapIndexed((colour, canvasX) => setCanvasPixelColour(canvasX)(colour));
+    const setCanvasPixelColour = R.pipe(getIndex, drawPixel); // int -> colour -> void
+    const setCanvasRowPixels = mapIndexed((colour, canvasX) => setCanvasPixelColour(canvasX)(colour)); // colour[] -> void
     setCanvasRowPixels(colours);
 });
 
@@ -116,7 +117,7 @@ function drawDots(mandelRect) {
     const c = getCanvas();
     var width, height;
     ({ width, height } = getCanvasDimensions(c));
-    const ctx = c.getContext("2d");
+    const ctx = c.getContext("2d", {willReadFrequently: true});
     const canvasData = ctx.getImageData(0, 0, width, height);
     const canvasRect = new Rectangle(0, 0, width, height);
 
@@ -155,8 +156,8 @@ const filterIndexed = R.addIndex(R.filter);
 
 const getJobs = R.curry((numWorkers, maxIterations, gridPoints) => {
 
-    const everyNthElement = (n, first) => filterIndexed((_, idx) => idx % n === first);
-    const getWorkerRows = workerId => everyNthElement(numWorkers, workerId);
+    const everyNthElement = (n, first) => filterIndexed((_, idx) => idx % n === first); // (int[], int) -> int[] -> int[]
+    const getWorkerRows = workerId => everyNthElement(numWorkers, workerId); // int -> int[] -> int[]
 
     return R.pipe(R.map(workerId => getWorkerRows(workerId)(gridPoints.mandelGridYpoints)),
         mapIndexed((rowChunk, firstRowIndex) => {

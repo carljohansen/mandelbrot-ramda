@@ -24,12 +24,12 @@ const getMandelShade = R.curry((maxIterations, b, a) => {
 
 const mandelShadeToColour = R.curry((maxIterations, numIterations) => {
     if (numIterations === 0) {
-        return { r: 255, g: 255, b: 255, a: 255 }; // For this complex number the function immediately escapes to infinity = white.
+        return { r: 255, g: 255, b: 255 }; // For this complex number the function immediately escapes to infinity = white.
     } else if (numIterations >= maxIterations) {
-        return { r: 0, g: 0, b: 0, a: 255 }; // The function (probably) never escapes to infinity = black.
+        return { r: 0, g: 0, b: 0 }; // The function (probably) never escapes to infinity = black.
     } else {
         var pixelShade = Math.round((maxIterations - numIterations) / maxIterations * 255);
-        return { r: pixelShade, g: pixelShade, b: pixelShade, a: 255 }; // The longer it takes to escape, the darker the pixel.
+        return { r: pixelShade, g: pixelShade, b: pixelShade }; // The longer it takes to escape, the darker the pixel.
     }
 });
 
